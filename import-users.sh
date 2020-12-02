@@ -128,7 +128,7 @@ kc_send_email() {
   --header "Content-Type: text/plain" \
   --header "Authorization: Bearer $access_token" \
   --data "["UPDATE_PASSWORD"]" \
-  "$base_url/admin/realms/$realm/users/$userid/reset-password")
+  "$base_url/admin/realms/$realm/users/$userid/execute-actions-email")
   msg="$username: password Email Send to $userid"
   process_result "204" "$result" "$msg"
   return $? #return status from process_result
