@@ -120,19 +120,16 @@ kc_set_group_hard() {
   return $? #return status from process_result
 }
 
-kc_set_pwd() {
+kc_send_email() {
   userid="$1"
   password="$2"
 
   result=$(curl --write-out " %{http_code}" -s -k --request PUT \
-  --header "Content-Type: application/json" \
+  --header "Content-Type: text/plain" \
   --header "Authorization: Bearer $access_token" \
-  --data '{
-    "type": "password",
-    "value": "'"$password"'",
-    "temporary": "true"
-  }' "$base_url/admin/realms/$realm/users/$userid/reset-password")
-  msg="$username: password set to $password"
+  --data "["UPDATE_PASSWORD"]" \
+  "$base_url/admin/realms/$realm/users/$userid/reset-password")
+  msg="$username: password Email Send to $userid"
   process_result "204" "$result" "$msg"
   return $? #return status from process_result
 }
@@ -154,14 +151,14 @@ unit_test() {
   echo "Testing normal behaviour. These operations should succeed"
   kc_login
   kc_create_user john joe johnjoe john@example.com
-  kc_set_pwd $userid ":Frepsip4"
+  kc_send_email $userid ":Frepsip4"
   kc_set_group_hard $userid 600be026-886a-428e-8318-31fde5dac452
   kc_delete_user $userid 
   kc_logout
 
   #echo "Testing abnormal behaviour. These operations should fail"
   #kc_create_user john tan johntan john@tan.com #try to create acct after logout
-  #kc_set_pwd "johntan" "testT3st"
+  #kc_send_email "johntan" "testT3st"
   #kc_delete_user "johntan" #try to delete acct after logout
 }
 
@@ -177,8 +174,8 @@ import_accts() {
 
     kc_create_user "${arr[0]}" "${arr[1]}" "${arr[2]}" "${arr[3]}"
 
-    [ $? -ne 0 ] || kc_set_pwd "$userid" "${arr[4]}"  #skip if kc_create_user failed
-    [ $? -ne 0 ] || kc_set_group_hard "$userid" "${arr[5]}" #skip if kc_create_user failed
+    [ $? -ne 0 ] || kc_send_email "$userid" "${arr[4]}"  #skip if kc_create_user failed
+#    [ $? -ne 0 ] || kc_set_group_hard "$userid" "${arr[5]}" #skip if kc_create_user failed
   done < "$csv_file"
 
   #kc_logout
