@@ -128,6 +128,7 @@ kc_send_email() {
   result=$(curl --write-out " %{http_code}" -s -k --request PUT \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer $access_token" \
+  --data '["UPDATE_PASSWORD"]' \
   "$base_url/admin/realms/$realm/users/$userid/execute-actions-email")
   msg="$username: password Email Send to $userid"
   process_result "204" "$result" "$msg"
