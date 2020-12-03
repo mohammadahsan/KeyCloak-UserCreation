@@ -99,7 +99,8 @@ kc_lookup_username() {
   --header "Authorization: Bearer $access_token" \
   "$base_url/admin/realms/$realm/users?username=${username}")
 
-  userid=`echo $result | grep -Eo '"id":.*?[^\\]"' | cut -d':'  -f 2 | sed -e 's/"//g'`
+  echo $result
+  userid=`echo $result | grep -Eo '"id":.*?[^\\]"' | cut -d':'  -f 2 | cut -d','  -f 1 | sed -e 's/"//g'`
   
   msg="$username: lookup "
   process_result "200" "$result" "$msg"
@@ -122,12 +123,11 @@ kc_set_group_hard() {
 
 kc_send_email() {
   userid="$1"
-  password="$2"
+  #password="$2"
 
   result=$(curl --write-out " %{http_code}" -s -k --request PUT \
-  --header "Content-Type: text/plain" \
+  --header "Content-Type: application/json" \
   --header "Authorization: Bearer $access_token" \
-  --data "["UPDATE_PASSWORD"]" \
   "$base_url/admin/realms/$realm/users/$userid/execute-actions-email")
   msg="$username: password Email Send to $userid"
   process_result "204" "$result" "$msg"
@@ -173,8 +173,8 @@ import_accts() {
     IFS=',' read -ra arr <<< "$line"
 
     kc_create_user "${arr[0]}" "${arr[1]}" "${arr[2]}" "${arr[3]}"
-
-    [ $? -ne 0 ] || kc_send_email "$userid" "${arr[4]}"  #skip if kc_create_user failed
+    kc_send_email "$userid"
+#    [ $? -ne 0 ] || kc_send_email "$userid" "${arr[4]}"  #skip if kc_create_user failed
 #    [ $? -ne 0 ] || kc_set_group_hard "$userid" "${arr[5]}" #skip if kc_create_user failed
   done < "$csv_file"
 
