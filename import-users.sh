@@ -99,7 +99,6 @@ kc_lookup_username() {
   --header "Authorization: Bearer $access_token" \
   "$base_url/admin/realms/$realm/users?username=${username}")
 
-  echo $result
   userid=`echo $result | grep -Eo '"id":.*?[^\\]"' | cut -d':'  -f 2 | cut -d','  -f 1 | sed -e 's/"//g'`
   
   msg="$username: lookup "
